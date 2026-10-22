@@ -54,6 +54,31 @@ export async function GET() {
   }
 }
 
+/**
+ * Moderation: DELETE /api/reaction?name=… with `Authorization: Bearer <LB_ADMIN_TOKEN>`
+ * removes that name from the board. Without the env var set, deletes are disabled.
+ */
+export async function DELETE(request: Request) {
+  const expected = process.env.LB_ADMIN_TOKEN ?? "";
+  const given = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
+  const a = new TextEncoder().encode(given);
+  const b = new TextEncoder().encode(expected);
+  // Constant-time comparison so the token can't be guessed byte by byte
+  let diff = a.length ^ b.length;
+  for (let i = 0; i < Math.max(a.length, b.length); i++) diff |= (a[i] ?? 0) ^ (b[i] ?? 0);
+  if (!expected || diff !== 0) return json({ error: "Not allowed" }, 401);
+
+  const name = new URL(request.url).searchParams.get("name")?.trim().toLowerCase();
+  if (!name) return json({ error: "Pass ?name=" }, 400);
+  try {
+    const removed = await redis.zrem(BOARD, name);
+    await redis.hdel(NAMES, name);
+    return json({ removed: removed > 0, name });
+  } catch {
+    return json({ error: "Leaderboard unavailable" }, 503);
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";

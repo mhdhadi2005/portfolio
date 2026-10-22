@@ -81,6 +81,7 @@ export default function Terminal() {
   const [touched, setTouched] = useState(false);
   const redis = useRef(new MiniRedis());
   const resp = useRef(true);
+  const explainedResp = useRef(false);
   const history = useRef<string[]>([]);
   const hIdx = useRef(-1);
   const nextId = useRef(1);
@@ -113,9 +114,13 @@ export default function Terminal() {
     const reply = redis.current.exec(argv);
     print(formatReply(reply), reply.t === "err" ? "err" : "out");
     if (resp.current) {
-      const trim = (s: string) => (s.length > 86 ? s.slice(0, 85) + "…" : s);
-      print(`  → ${trim(encodeCommand(argv))}`, "dim");
-      print(`  ← ${trim(encodeReply(reply))}`, "dim");
+      const trim = (s: string) => (s.length > 70 ? s.slice(0, 69) + "…" : s);
+      if (!explainedResp.current) {
+        explainedResp.current = true;
+        print("  raw RESP on the wire: the protocol redis-java parses (`resp off` to hide)", "amber");
+      }
+      print(`  sent    → ${trim(encodeCommand(argv))}`, "dim");
+      print(`  replied ← ${trim(encodeReply(reply))}`, "dim");
     }
   };
 
