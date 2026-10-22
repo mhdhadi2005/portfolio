@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { saveName, savedName, secs, submitTime } from "../lib/leaderboard";
 
 type Phase = "idle" | "arming" | "hold" | "go" | "done" | "jump";
 
@@ -30,11 +31,14 @@ export default function StartLights() {
   const [lit, setLit] = useState(0);
   const [result, setResult] = useState<number | null>(null);
   const [best, setBest] = useState<number | null>(null);
+  const [name, setName] = useState("");
+  const [sent, setSent] = useState<{ state: "idle" | "sending" | "ok" | "error"; text: string }>({ state: "idle", text: "" });
   const timers = useRef<number[]>([]);
   const goAt = useRef(0);
 
   useEffect(() => {
     setBest(readBest());
+    setName(savedName());
     return () => timers.current.forEach(clearTimeout);
   }, []);
 
@@ -44,6 +48,7 @@ export default function StartLights() {
     timers.current.forEach(clearTimeout);
     timers.current = [];
     setResult(null);
+    setSent({ state: "idle", text: "" });
     setLit(0);
     setPhase("arming");
     for (let i = 1; i <= 5; i++) later(() => setLit(i), i * 850);
@@ -88,6 +93,26 @@ export default function StartLights() {
     return () => window.removeEventListener("lights:start", on);
   });
 
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (result === null || sent.state === "sending") return;
+    setSent({ state: "sending", text: "Sending to race control…" });
+    try {
+      const r = await submitTime(name, result);
+      saveName(name.trim());
+      setSent({
+        state: "ok",
+        text: r.improved
+          ? `P${r.rank} of ${r.total} on the global board`
+          : `Your best ${secs(r.best)} stands · P${r.rank} of ${r.total}`,
+      });
+    } catch (err) {
+      setSent({ state: "error", text: err instanceof Error ? err.message : "Couldn't submit right now" });
+    }
+  };
+
+  const canSubmit = phase === "done" && result !== null && result >= 100 && result <= 1500;
+
   const message =
     phase === "idle"
       ? "F1 reaction test · tap to start, tap again when the lights go out"
@@ -102,11 +127,11 @@ export default function StartLights() {
               : "";
 
   return (
-    <div id="start-lights" className="w-full max-w-[22rem]">
+    <div id="start-lights" className="pixel-box w-full max-w-[22rem] px-3 py-3">
       <button
         type="button"
         onClick={press}
-        className="pixel-box group block w-full cursor-pointer px-3 py-3 text-left"
+        className="block w-full cursor-pointer text-left"
         aria-label={phase === "go" ? "Lights out: click now" : "F1 start lights reaction test"}
       >
         <div className="flex items-center justify-center gap-1.5" aria-hidden="true">
@@ -131,10 +156,39 @@ export default function StartLights() {
         >
           {message}
         </p>
-        {best !== null && (
-          <p className="mt-1 text-center font-pixel text-[10px] text-fg-faint uppercase">Your best · {(best / 1000).toFixed(3)}s</p>
-        )}
       </button>
+
+      {canSubmit && sent.state !== "ok" && (
+        <form onSubmit={submit} className="mt-2 flex gap-1.5">
+          <label htmlFor="lb-name" className="sr-only">
+            Name for the leaderboard
+          </label>
+          <input
+            id="lb-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            maxLength={14}
+            placeholder="your name"
+            autoComplete="nickname"
+            className="min-w-0 flex-1 border-2 border-line bg-bg px-2 py-1 font-mono text-[12px] text-fg outline-none placeholder:text-fg-faint focus:border-mint"
+          />
+          <button type="submit" disabled={sent.state === "sending" || name.trim().length < 2} className="pixel-button cursor-pointer !px-2.5 !py-1.5 !text-[12px] text-mint disabled:cursor-default disabled:opacity-50">
+            Submit
+          </button>
+        </form>
+      )}
+      {sent.text && (
+        <p aria-live="polite" className={`mt-1.5 text-center font-mono text-[11px] ${sent.state === "error" ? "text-coral" : sent.state === "ok" ? "text-mint" : "text-fg-dim"}`}>
+          {sent.text}
+        </p>
+      )}
+
+      <div className="mt-1.5 flex items-center justify-between gap-2 font-pixel text-[10px] text-fg-faint uppercase">
+        <span>{best !== null ? `Your best · ${(best / 1000).toFixed(3)}s` : "No time yet"}</span>
+        <button type="button" onClick={() => window.dispatchEvent(new Event("leaderboard:open"))} className="cursor-pointer text-amber uppercase hover:underline">
+          Leaderboard ↗
+        </button>
+      </div>
     </div>
   );
 }

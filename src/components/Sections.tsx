@@ -12,7 +12,7 @@ import { Bullet, Reveal, Section, SectionHeader, Tag } from "./ui";
 
 export function Hero() {
   return (
-    <section id="top" className="relative pt-14 pb-[205px] sm:pb-[215px]">
+    <section id="top" className="relative pt-14 pb-[235px] sm:pb-[245px]">
       <div className="relative mx-auto grid w-full max-w-[1180px] grid-cols-1 items-center gap-6 px-4 py-8 sm:px-6 sm:py-10  lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)] lg:gap-8 lg:px-8">
         <div className="pixel-box p-6 sm:p-8">
           <p className="flex items-center gap-2 font-pixel text-[10px] text-mint uppercase sm:text-xs">

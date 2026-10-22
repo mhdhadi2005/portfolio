@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Header } from "./components/Header";
+import Leaderboard from "./components/Leaderboard";
 import NightScene from "./components/NightScene";
 import { RaceRail, useLapTimer } from "./components/Race";
 import { About, Achievements, Contact, Experience, Hero, Projects, Stack } from "./components/Sections";
@@ -35,6 +36,7 @@ export default function App() {
         <Contact />
       </main>
       <RaceRail />
+      <Leaderboard />
     </>
   );
 }

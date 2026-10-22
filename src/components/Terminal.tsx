@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type Reac
 import { profile, projects, sections, skills } from "../data";
 import { smaCrossover } from "../lib/backtest";
 import { btcStore, loadBtc, usd } from "../lib/btc";
+import { fetchBoard, secs } from "../lib/leaderboard";
 import { encodeCommand, encodeReply, formatReply, MiniRedis, REDIS_COMMANDS, splitArgs } from "../lib/redis";
 
 type Kind = "in" | "out" | "dim" | "err" | "ok" | "amber";
@@ -149,6 +150,7 @@ export default function Terminal() {
         print("  resp on|off               show the raw RESP bytes on the wire");
         print("pit wall", "amber");
         print("  lights                    F1 start-lights reaction test");
+        print("  leaderboard               global top 10 reaction times");
         print("  box                       box box: pit for the résumé");
         print("github", "amber");
         print("  git log                   my latest real commits");
@@ -300,6 +302,21 @@ export default function Terminal() {
         print("lights out and away we go… scroll down to the gantry", "dim");
         window.dispatchEvent(new Event("lights:start"));
         return;
+      case "leaderboard":
+      case "lb": {
+        setBusy(true);
+        try {
+          const b = await fetchBoard();
+          if (!b.top.length) print("no times on the board yet. run `lights` and be the first.", "dim");
+          b.top.forEach((e, i) => print(`  ${String(i + 1).padStart(2)}  ${e.name.padEnd(16)} ${secs(e.ms)}`, i === 0 ? "amber" : "out"));
+          if (b.total) print(`${b.total} driver${b.total === 1 ? "" : "s"} on the board`, "dim");
+        } catch {
+          print("leaderboard: race control is offline right now", "err");
+        } finally {
+          setBusy(false);
+        }
+        return;
+      }
       case "box":
         print("box box, box box. pitting for the résumé.", "amber");
         window.open(profile.resume, "_blank", "noopener");
