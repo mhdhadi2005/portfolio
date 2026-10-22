@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { achievements, education, experience, facts, interests, profile, projects, projectTags, summary, type Project, type ProjectTag } from "../data";
+import { useEffect, useState } from "react";
+import { achievements, education, experience, profile, projects, summary, type Project } from "../data";
 import Blueprint from "./Blueprint";
 import HeroCar from "./HeroCar";
 import MediaFigure from "./Media";
@@ -25,8 +25,8 @@ export function Hero() {
             Hadi<span className="text-mint">.</span>
           </h1>
           <p className="mt-5 font-display text-xl leading-snug text-fg sm:text-2xl">{profile.oneLiner}</p>
-          <p className="mt-3 text-[1.05rem] leading-relaxed text-fg-dim">
-            {profile.role}. {profile.intro}
+          <p className="mt-3 font-mono text-sm text-fg-dim">
+            {profile.role}
           </p>
           <div className="mt-7 flex flex-wrap gap-2.5">
             <a href={profile.github} target="_blank" rel="noreferrer" className="pixel-button">
@@ -62,14 +62,16 @@ export function About() {
   return (
     <Section id="about" tone="bg-bg/90">
       <SectionHeader index="01" title="About" />
-      <div className="grid gap-10 lg:grid-cols-[1.25fr_1fr] lg:gap-14">
+      <div className="grid items-start gap-10 lg:grid-cols-[1.4fr_1fr] lg:gap-14">
         <Reveal>
           <p className="text-xl leading-relaxed sm:text-[1.4rem] sm:leading-relaxed">{summary}</p>
           <p className="mt-6 inline-flex items-center gap-2.5 font-display text-mint">
             <span className="size-2 bg-mint blink" aria-hidden="true" />
             Now: {profile.status}
           </p>
-          <div className="pixel-box mt-8 p-5 sm:p-6">
+        </Reveal>
+        <Reveal delay={80}>
+          <div className="pixel-box p-5 sm:p-6">
             <p className="font-pixel text-[10px] text-fg-faint uppercase">Education</p>
             <h3 className="mt-2 font-display text-xl leading-snug font-semibold">{education.degree}</h3>
             <p className="mt-1 font-display text-amber">{education.school}</p>
@@ -78,15 +80,6 @@ export function About() {
             </p>
           </div>
         </Reveal>
-        <ul className="grid grid-cols-2 gap-3 sm:gap-4">
-          {facts.map((f, i) => (
-            <Reveal as="li" key={f.label} delay={i * 70} className="pixel-box p-4 sm:p-5">
-              <p className="font-display text-3xl font-semibold text-amber sm:text-4xl">{f.value}</p>
-              <p className="mt-2 font-display text-fg">{f.label}</p>
-              <p className="mt-0.5 text-sm text-fg-dim">{f.note}</p>
-            </Reveal>
-          ))}
-        </ul>
       </div>
     </Section>
   );
@@ -243,37 +236,15 @@ function ProjectCard({ p, meta }: { p: Project; meta?: RepoMeta }) {
 }
 
 export function Projects() {
-  const [tag, setTag] = useState<ProjectTag | "All">("All");
   const repos = useRepos();
-  const list = useMemo(() => (tag === "All" ? projects : projects.filter((p) => p.tags.includes(tag))), [tag]);
-  const counts = useMemo(() => Object.fromEntries(projectTags.map((t) => [t, projects.filter((p) => p.tags.includes(t)).length])), []);
 
   return (
     <Section id="projects" tone="bg-bg/90">
       <SectionHeader index="03" title="Projects">
         Real code and images straight from my repos. Two of them run live in the terminal up top.
       </SectionHeader>
-      <div role="group" aria-label="Filter projects" className="flex flex-wrap gap-2">
-        {(["All", ...projectTags] as const).map((t) => {
-          const on = t === tag;
-          return (
-            <button
-              key={t}
-              type="button"
-              aria-pressed={on}
-              onClick={() => setTag(t)}
-              className={`pixel-button cursor-pointer ${on ? "!bg-mint !text-ink" : ""}`}
-            >
-              {t} <span className={on ? "" : "text-mint"}>{t === "All" ? projects.length : counts[t]}</span>
-            </button>
-          );
-        })}
-      </div>
-      <p aria-live="polite" className="sr-only">
-        Showing {list.length} projects
-      </p>
-      <ul key={tag} className="mt-8 space-y-6">
-        {list.map((p, i) => (
+      <ul className="space-y-6">
+        {projects.map((p, i) => (
           <Reveal as="li" key={p.id} delay={Math.min(i, 2) * 60}>
             <ProjectCard p={p} meta={p.repo ? repos[p.repo.toLowerCase()] : undefined} />
           </Reveal>
@@ -296,7 +267,7 @@ export function Stack() {
   );
 }
 
-/* ---------------------------------------------------------------- Achievements + interests */
+/* ---------------------------------------------------------------- Achievements */
 
 export function Achievements() {
   return (
@@ -317,22 +288,6 @@ export function Achievements() {
         ))}
       </ol>
 
-      <div id="interests" className="mt-20 scroll-mt-28">
-        <Reveal>
-          <h3 className="font-display text-3xl font-semibold">What I keep coming back to</h3>
-        </Reveal>
-        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {interests.map((it, i) => (
-            <Reveal as="li" key={it.name} delay={(i % 3) * 60} className="pixel-box p-5">
-              <h4 className="flex items-center gap-2 font-display text-lg text-fg">
-                <span className="size-2 bg-mint" aria-hidden="true" />
-                {it.name}
-              </h4>
-              <p className="mt-2 leading-relaxed text-fg-dim">{it.note}</p>
-            </Reveal>
-          ))}
-        </ul>
-      </div>
     </Section>
   );
 }

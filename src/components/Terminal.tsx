@@ -21,7 +21,7 @@ const COINS: Record<string, string> = {
   link: "chainlink",
 };
 
-const SUGGESTIONS = ["whoami", "SET coin btc", "GET coin", "INCR visits", "backtest 10 30", "lights", "git log", "help"];
+const SUGGESTIONS = ["whoami", "SET coin btc", "backtest 10 30", "lights", "help"];
 
 const pct = (x: number) => `${x >= 0 ? "+" : ""}${(x * 100).toFixed(2)}%`;
 
@@ -99,8 +99,7 @@ export default function Terminal() {
     loadBtc();
     if (greeted.current) return;
     greeted.current = true;
-    print("hadi-sh 1.0 · an interactive shell, running in your browser", "amber");
-    print("A mini Redis (like redis-java) and a BTC backtester on live 4h candles are wired in.", "dim");
+    print("hadi-sh · a real shell in your browser: mini Redis, live BTC backtester and more", "amber");
     print("Type help, or tap a command below.", "dim");
   }, [print]);
 

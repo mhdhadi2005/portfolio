@@ -15,13 +15,6 @@ export const profile = {
 export const summary =
   "I design, build, test and debug software in Python, Java, C/C++ and JavaScript, and I like working close to the metal of a system: wire protocols, replication, schemas. I ship to Azure, AWS and GCP with Docker and Kubernetes, and iterate on designs from real stakeholder feedback. Outside of that I'm deep in markets: quant research, trading competitions and crypto.";
 
-export const facts = [
-  { label: "Trading competition", value: "5th", note: "National · Big Bull" },
-  { label: "Innovators award", value: "Top 3", note: "Sharjah Chamber" },
-  { label: "Languages", value: "7", note: "Python, Java, C/C++, JS/TS, SQL" },
-  { label: "Clouds shipped to", value: "3", note: "Azure · AWS · GCP" },
-];
-
 export type Experience = {
   role: string;
   org: string;
@@ -74,8 +67,6 @@ export type Media =
   | { kind: "code"; file: string; lang: "java" | "python" | "c" | "sql"; code: string }
   | { kind: "art"; name: string; caption: string };
 
-export type ProjectTag = "Quant" | "Systems" | "AI/ML" | "Web";
-
 export type Project = {
   id: string;
   name: string;
@@ -85,7 +76,6 @@ export type Project = {
   summary: string;
   points: string[];
   stack: string[];
-  tags: ProjectTag[];
   media: Media[];
   /** Command to run in the hero terminal, for projects with a live demo. */
   demo?: { label: string; command: string };
@@ -106,7 +96,6 @@ export const projects: Project[] = [
       "Inference served behind FastAPI for real-time, low-latency predictions.",
     ],
     stack: ["Python", "Pandas", "XGBoost", "LSTM", "FastAPI"],
-    tags: ["Quant", "AI/ML"],
     demo: { label: "Run a backtest", command: "backtest 10 30" },
     media: [
       {
@@ -150,7 +139,6 @@ self.profit_factor = gross_profit / max(gross_loss, 0.01)`,
       "Containerised with Docker and shipped with a documented Kubernetes Helm chart.",
     ],
     stack: ["Java", "Spring", "TCP", "Docker", "Helm"],
-    tags: ["Systems"],
     demo: { label: "Try it in the terminal", command: "SET hello world" },
     media: [
       {
@@ -193,7 +181,6 @@ public int getParts(char []dataArr, int i, String[] subArray){
       "Never touches client money: no payment processor needed.",
     ],
     stack: ["JavaScript", "Node"],
-    tags: ["Web"],
     media: [
       { kind: "img", src: "/media/slot-1.webp", alt: "Slotlock launch carousel: Your DMs aren't a booking system.", caption: "Launch carousel, 1 of 3", pos: "50% 45%" },
       { kind: "img", src: "/media/slot-3.webp", alt: "Slotlock carousel showing an artist's booking page on a phone with open time slots.", caption: "The booking page", pos: "50% 40%" },
@@ -213,7 +200,6 @@ public int getParts(char []dataArr, int i, String[] subArray){
       "OpenAI API examples for structured outputs, Assistants and Whisper.",
     ],
     stack: ["Python", "LLM APIs", "MCP", "RAG"],
-    tags: ["AI/ML"],
     media: [
       { kind: "img", src: "/media/cook-rrf.webp", alt: "Diagram: how Reciprocal Rank Fusion combines BM25 and dense rankings.", caption: "Hybrid retrieval: Reciprocal Rank Fusion", fit: "contain", light: true },
       { kind: "img", src: "/media/cook-bm25.webp", alt: "Diagram: how BM25 ranks documents.", caption: "Hybrid retrieval: how BM25 ranks", fit: "contain", light: true },
@@ -232,7 +218,6 @@ public int getParts(char []dataArr, int i, String[] subArray){
       "Next.js + Beehiiv merge-tag integration, with the data flow between newsletter, points engine and WooCommerce documented.",
     ],
     stack: ["Next.js", "Node", "Beehiiv API", "WooCommerce", "SQL"],
-    tags: ["Web"],
     media: [
       {
         kind: "code",
@@ -271,7 +256,6 @@ CREATE TABLE IF NOT EXISTS click_log (
       "Compiles a subset of C straight to x86-64 GNU assembly that links against libc, so programs can call real functions like printf.",
     points: ["Pointers, arrays, short-circuit logic, if/while/for and functions with up to 6 params via the System V ABI."],
     stack: ["C", "x86-64", "System V ABI"],
-    tags: ["Systems"],
     media: [
       {
         kind: "code",
@@ -328,12 +312,9 @@ int main() {
       "Ships a built-in workbench UI for testing and demos.",
     ],
     stack: ["Python", "OpenAI-compatible APIs", "Ollama"],
-    tags: ["AI/ML", "Systems"],
     media: [{ kind: "art", name: "chip", caption: "Your app → LocalGPT API → any local inference server" }],
   },
 ];
-
-export const projectTags: ProjectTag[] = ["Quant", "Systems", "AI/ML", "Web"];
 
 /** Each skill group maps to a system on the #44, lit up in the Stack blueprint. */
 export const skills = [
@@ -372,29 +353,6 @@ export const achievements = [
   { kind: "Award", title: "Top 3, Sharjah Chamber Award for Innovators", by: "Sharjah Chamber of Commerce", highlight: false },
   { kind: "Certification", title: "Microsoft Azure for Data Engineering", by: "Microsoft", highlight: false },
   { kind: "Certification", title: "Python for Data Science, AI & Development", by: "IBM", highlight: false },
-];
-
-export const interests = [
-  {
-    name: "Quant & algo trading",
-    note: "5th nationally in the Big Bull trading competition. QuantAI brings the same discipline to models: time-aware splits, honest backtests, no lookahead.",
-  },
-  {
-    name: "Crypto & on-chain markets",
-    note: "Markets that never close. Order flow, on-chain data and the infrastructure that settles it: where finance runs into distributed systems.",
-  },
-  {
-    name: "Distributed systems",
-    note: "Replication and the bugs that only show up with two clients at once. redis-java is where I learned to respect the wire.",
-  },
-  {
-    name: "AI agents & MCP",
-    note: "Agent design, RAG pipelines and the Model Context Protocol, written up in ai-cookbook so I never solve the same problem twice.",
-  },
-  {
-    name: "Compilers & low-level",
-    note: "minic compiles C to x86-64 by hand. Nothing shows you what a program really is like emitting its assembly.",
-  },
 ];
 
 export const sections = [
