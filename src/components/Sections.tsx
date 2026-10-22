@@ -383,7 +383,11 @@ export function Contact() {
             © {new Date().getFullYear()} {profile.name} · {profile.location}
           </p>
           <p>
-            Built from scratch · type <span className="text-mint">help</span> in the terminal
+            Built from scratch ·{" "}
+            <a href={`${profile.github}/portfolio`} target="_blank" rel="noreferrer" className="text-peri hover:underline">
+              source ↗
+            </a>{" "}
+            · type <span className="text-mint">help</span> in the terminal
           </p>
         </div>
       </footer>
