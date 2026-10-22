@@ -1,0 +1,250 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0b0d1e;
+  --color-ink: #0f1126;
+  --color-surface: #151834;
+  --color-line: #2a2e57;
+  --color-fg: #eceaff;
+  --color-fg-dim: #a8abd0;
+  --color-fg-faint: #6d71a0;
+  --color-mint: #7fe0c3;
+  --color-coral: #ff7a8a;
+  --color-amber: #ffb454;
+  --color-peri: #9db4ff;
+
+  --font-display: "Pixelify Sans", ui-monospace, monospace;
+  --font-pixel: "Silkscreen", ui-monospace, monospace;
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 4.5rem;
+  background: var(--color-bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  /* Transparent so the fixed night-sky canvas (z -10) shows through */
+  background: transparent;
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--color-mint);
+  color: var(--color-ink);
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-peri);
+  outline-offset: 3px;
+}
+/* The terminal's blinking caret is its focus indicator */
+#term-input:focus-visible {
+  outline: none;
+}
+
+/* Stepped 4px corners, the pixel equivalent of a border radius */
+.pixel-notch {
+  clip-path: polygon(
+    0 4px,
+    4px 4px,
+    4px 0,
+    calc(100% - 4px) 0,
+    calc(100% - 4px) 4px,
+    100% 4px,
+    100% calc(100% - 4px),
+    calc(100% - 4px) calc(100% - 4px),
+    calc(100% - 4px) 100%,
+    4px 100%,
+    4px calc(100% - 4px),
+    0 calc(100% - 4px)
+  );
+}
+
+/* Panel: surface fill with a 2px pixel border drawn inside the notch */
+.pixel-box {
+  position: relative;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 2px var(--color-line);
+  clip-path: polygon(
+    0 4px,
+    4px 4px,
+    4px 0,
+    calc(100% - 4px) 0,
+    calc(100% - 4px) 4px,
+    100% 4px,
+    100% calc(100% - 4px),
+    calc(100% - 4px) calc(100% - 4px),
+    calc(100% - 4px) 100%,
+    4px 100%,
+    4px calc(100% - 4px),
+    0 calc(100% - 4px)
+  );
+}
+.pixel-box-amber {
+  box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--color-amber) 65%, transparent);
+  background: color-mix(in oklab, var(--color-amber) 5%, var(--color-surface));
+}
+
+.pixel-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  line-height: 1;
+  padding: 0.6rem 0.85rem;
+  color: var(--color-fg);
+  background: var(--color-ink);
+  box-shadow: inset 0 0 0 2px var(--color-line);
+  text-decoration: none;
+  transition:
+    box-shadow 120ms steps(2),
+    color 120ms,
+    transform 120ms steps(2);
+  clip-path: polygon(
+    0 3px,
+    3px 3px,
+    3px 0,
+    calc(100% - 3px) 0,
+    calc(100% - 3px) 3px,
+    100% 3px,
+    100% calc(100% - 3px),
+    calc(100% - 3px) calc(100% - 3px),
+    calc(100% - 3px) 100%,
+    3px 100%,
+    3px calc(100% - 3px),
+    0 calc(100% - 3px)
+  );
+}
+.pixel-button:hover {
+  box-shadow: inset 0 0 0 2px var(--color-mint);
+  transform: translateY(-1px);
+}
+.pixel-button:active {
+  transform: translateY(1px);
+}
+
+/* Reveal-on-scroll: content steps in, pixel style */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 420ms steps(6),
+    transform 420ms steps(6);
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+.blink {
+  animation: blink 1.1s steps(1) infinite;
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .blink {
+    animation: none;
+  }
+}
+
+.pixelated {
+  image-rendering: pixelated;
+}
+
+/* ---- The #44: engineering, lit ---- */
+.wheel-spin {
+  transform: rotate(var(--wheel, 0deg));
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.rain-light {
+  animation: rain-light 0.9s steps(1) infinite;
+}
+@keyframes rain-light {
+  50% {
+    opacity: 0.15;
+  }
+}
+.brake-glow,
+.ers-glow {
+  opacity: 0;
+  transition: opacity 250ms;
+}
+[data-brakes="on"] .brake-glow {
+  opacity: 1;
+}
+[data-ers="on"] .ers-glow {
+  opacity: 1;
+  filter: drop-shadow(0 0 3px #7fe0c3) drop-shadow(0 0 8px #7fe0c3);
+}
+.drs-flap {
+  transform-box: fill-box;
+  transform-origin: 100% 50%;
+  transition: transform 300ms;
+}
+[data-drs="open"] .drs-flap {
+  transform: rotate(-14deg) translateY(-3px);
+}
+.energy-flow {
+  animation: energy-flow 0.6s linear infinite;
+}
+@keyframes energy-flow {
+  to {
+    stroke-dashoffset: -14;
+  }
+}
+.sensor-ping {
+  animation: sensor-ping 1.2s steps(4) infinite;
+}
+@keyframes sensor-ping {
+  50% {
+    opacity: 0.25;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rain-light,
+  .energy-flow,
+  .sensor-ping {
+    animation: none;
+  }
+}
+
+[data-rolling="on"] .wheel-spin {
+  animation: wheel-roll 0.22s linear infinite;
+}
+@keyframes wheel-roll {
+  to {
+    transform: rotate(360deg);
+  }
+}
