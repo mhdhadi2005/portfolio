@@ -64,7 +64,7 @@ export const education = {
 
 export type Media =
   | { kind: "img"; src: string; alt: string; caption: string; fit?: "cover" | "contain"; pos?: string; light?: boolean }
-  | { kind: "code"; file: string; lang: "java" | "python" | "c" | "sql"; code: string }
+  | { kind: "code"; file: string; lang: "java" | "python" | "c" | "sql" | "ts"; code: string }
   | { kind: "art"; name: string; caption: string };
 
 export type Project = {
@@ -82,6 +82,39 @@ export type Project = {
 };
 
 export const projects: Project[] = [
+  {
+    id: "portfolio",
+    name: "This portfolio",
+    subtitle: "Hand-built, no templates",
+    status: "Shipped",
+    repo: "portfolio",
+    summary:
+      "The site you're on: a canvas pixel scene, a vector F1 car whose lit engineering is driven by CSS data attributes, and a terminal that runs a mini Redis and a live backtester in your browser.",
+    points: [
+      "React 19, TypeScript, Vite and Tailwind v4. No UI kit, no animation library.",
+      "A serverless start-lights leaderboard on a Redis sorted set, validated, rate-limited and moderated.",
+      "Three modes re-frame the whole site, Vercel Analytics and JSON-LD for search, and every push auto-deploys.",
+    ],
+    stack: ["React", "TypeScript", "Tailwind", "Canvas", "Vercel"],
+    media: [
+      { kind: "img", src: "/og.png", alt: "The portfolio hero: a pixel night scene with the terminal and the #44 on the grid.", caption: "The hero, live", pos: "50% 30%" },
+      {
+        kind: "code",
+        file: "api/reaction.ts",
+        lang: "ts",
+        code: `const key = name.toLowerCase();
+const prev = await redis.zscore(BOARD, key);
+const improved = prev === null || ms < Number(prev);
+if (improved) {
+  await redis.zadd(BOARD, { score: ms, member: key });
+  await redis.hset(NAMES, { [key]: name });
+  // Keep the board bounded: drop everyone below the top MAX_ENTRIES
+  await redis.zremrangebyrank(BOARD, MAX_ENTRIES, -1);
+}
+const [rank, total] = await Promise.all([redis.zrank(BOARD, key), redis.zcard(BOARD)]);`,
+      },
+    ],
+  },
   {
     id: "quantai",
     name: "QuantAI",
@@ -316,37 +349,6 @@ int main() {
   },
 ];
 
-/** Each skill group maps to a system on the #44, lit up in the Stack blueprint. */
-export const skills = [
-  {
-    group: "Languages",
-    zone: "cockpit",
-    part: "Cockpit",
-    why: "The controls. Everything else is driven from here.",
-    items: ["Python", "Java", "C", "C++", "JavaScript", "TypeScript", "SQL"],
-  },
-  {
-    group: "Backend & systems",
-    zone: "power",
-    part: "Power unit",
-    why: "The engine: servers, protocols and data stores that do the real work.",
-    items: ["FastAPI", "Spring", "Node.js", "Flask", "RESP / TCP", "MongoDB", "MySQL", "Redis"],
-  },
-  {
-    group: "Data, ML & quant",
-    zone: "telemetry",
-    part: "Tyres & telemetry",
-    why: "Strategy comes from data: models, backtests and the sensors feeding them.",
-    items: ["Pandas", "NumPy", "Scikit-learn", "XGBoost", "LSTM", "Backtesting", "RAG", "MCP"],
-  },
-  {
-    group: "Infra & cloud",
-    zone: "ers",
-    part: "ERS + DRS",
-    why: "Deploy power exactly when it's needed: containers, clusters and CI.",
-    items: ["Docker", "Kubernetes (Helm)", "GitHub Actions", "Azure", "Google Cloud", "AWS"],
-  },
-] as const;
 
 export const achievements = [
   { kind: "Award", title: "5th nationally, Big Bull Trading Competition", by: "Master's Union × CaseUnion", highlight: true },

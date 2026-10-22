@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { achievements, education, experience, profile, projects, summary, type Project } from "../data";
+import { achievements, education, experience, profile, projects, type Project } from "../data";
+import { useMode } from "../modes";
+import { ModeSwitch } from "./ModeSwitch";
 import Blueprint from "./Blueprint";
 import HeroCar from "./HeroCar";
 import MediaFigure from "./Media";
@@ -11,22 +13,26 @@ import { Bullet, Reveal, Section, SectionHeader, Tag } from "./ui";
 /* ---------------------------------------------------------------- Hero */
 
 export function Hero() {
+  const { mode, cfg } = useMode();
   return (
     <section id="top" className="relative pt-14 pb-[235px] sm:pb-[245px]">
       <div className="relative mx-auto grid w-full max-w-[1180px] grid-cols-1 items-center gap-6 px-4 py-8 sm:px-6 sm:py-10  lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)] lg:gap-8 lg:px-8">
         <div className="pixel-box p-6 sm:p-8">
-          <p className="flex items-center gap-2 font-pixel text-[10px] text-mint uppercase sm:text-xs">
+          <ModeSwitch />
+          <p key={`tag-${mode}`} className="mode-in mt-5 flex items-center gap-2 font-pixel text-[10px] text-mint uppercase sm:text-xs">
             <span className="size-2 bg-mint blink" aria-hidden="true" />
-            Open to SWE internships
+            {cfg.tag} · open to internships
           </p>
           <h1 className="mt-4 font-display text-[clamp(2.75rem,7vw,5rem)] leading-[0.95] font-semibold">
             Mohammed
             <br />
             Hadi<span className="text-mint">.</span>
           </h1>
-          <p className="mt-5 font-display text-xl leading-snug text-fg sm:text-2xl">{profile.oneLiner}</p>
-          <p className="mt-3 font-mono text-sm text-fg-dim">
-            {profile.role}
+          <p key={`one-${mode}`} className="mode-in mt-5 font-display text-xl leading-snug text-fg sm:text-2xl">
+            {cfg.oneLiner}
+          </p>
+          <p key={`role-${mode}`} className="mode-in mt-3 font-mono text-sm text-fg-dim">
+            {cfg.role}
           </p>
           <div className="mt-7 flex flex-wrap gap-2.5">
             <a href={profile.github} target="_blank" rel="noreferrer" className="pixel-button">
@@ -59,12 +65,15 @@ export function Hero() {
 /* ---------------------------------------------------------------- About */
 
 export function About() {
+  const { mode, cfg } = useMode();
   return (
     <Section id="about" tone="bg-bg/90">
       <SectionHeader index="01" title="About" />
       <div className="grid items-start gap-10 lg:grid-cols-[1.4fr_1fr] lg:gap-14">
         <Reveal>
-          <p className="text-xl leading-relaxed sm:text-[1.4rem] sm:leading-relaxed">{summary}</p>
+          <p key={`sum-${mode}`} className="mode-in text-xl leading-relaxed sm:text-[1.4rem] sm:leading-relaxed">
+            {cfg.summary}
+          </p>
           <p className="mt-6 inline-flex items-center gap-2.5 font-display text-mint">
             <span className="size-2 bg-mint blink" aria-hidden="true" />
             Now: {profile.status}
@@ -88,15 +97,27 @@ export function About() {
 /* ---------------------------------------------------------------- Experience */
 
 export function Experience() {
+  const { mode, cfg } = useMode();
+  const ordered = [...experience].sort((a, b) => cfg.experience.indexOf(a.org) - cfg.experience.indexOf(b.org));
   return (
     <Section id="experience" tone="bg-ink/90">
       <SectionHeader index="02" title="Experience" />
       <ol className="space-y-5">
-        {experience.map((x, i) => (
-          <Reveal as="li" key={x.org} delay={i * 60} className="pixel-box grid gap-x-8 gap-y-3 p-5 sm:p-7 md:grid-cols-[13rem_1fr]">
+        {ordered.map((x, i) => {
+          const spotlight = mode !== "eng" && i === 0;
+          return (
+          <Reveal
+            as="li"
+            key={`${mode}-${x.org}`}
+            delay={i * 60}
+            className={`pixel-box grid gap-x-8 gap-y-3 p-5 sm:p-7 md:grid-cols-[13rem_1fr] ${spotlight ? "!shadow-[inset_0_0_0_2px_var(--color-mint)]" : ""}`}
+          >
             <div className="font-mono text-sm text-fg-dim">
               <p className="tabular-nums">{x.period}</p>
               <p>{x.place}</p>
+              {spotlight && (
+                <p className="mt-2 font-pixel text-[10px] text-mint uppercase">★ Most relevant here</p>
+              )}
               {x.current && (
                 <p className="mt-2 inline-flex items-center gap-2 font-pixel text-[10px] text-mint uppercase">
                   <span className="size-1.5 bg-mint blink" aria-hidden="true" />
@@ -121,7 +142,8 @@ export function Experience() {
               </p>
             </div>
           </Reveal>
-        ))}
+          );
+        })}
       </ol>
     </Section>
   );
@@ -182,7 +204,7 @@ const statusTone: Record<Project["status"], string> = {
   "In progress": "text-amber",
 };
 
-function ProjectCard({ p, meta }: { p: Project; meta?: RepoMeta }) {
+function ProjectCard({ p, meta, angle }: { p: Project; meta?: RepoMeta; angle?: string }) {
   return (
     <article id={p.id} className="pixel-box grid scroll-mt-28 overflow-hidden md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
       <MediaFigure items={p.media} label={p.name} />
@@ -195,6 +217,12 @@ function ProjectCard({ p, meta }: { p: Project; meta?: RepoMeta }) {
           </span>
         </header>
         <p className="-mt-1 font-display text-lg text-amber">{p.subtitle}</p>
+        {angle && (
+          <p className="mode-in -mt-1 flex items-start gap-2 font-mono text-[13px] text-mint">
+            <span aria-hidden="true">▸</span>
+            {angle}
+          </p>
+        )}
         <p className="leading-relaxed">{p.summary}</p>
         <ul className="space-y-2 leading-relaxed text-fg-dim">
           {p.points.map((pt) => (
@@ -237,19 +265,35 @@ function ProjectCard({ p, meta }: { p: Project; meta?: RepoMeta }) {
 
 export function Projects() {
   const repos = useRepos();
+  const { mode, cfg } = useMode();
+  const [showAll, setShowAll] = useState(false);
+  useEffect(() => setShowAll(false), [mode]);
+
+  const featured = cfg.projects.map((id) => projects.find((p) => p.id === id)).filter(Boolean) as Project[];
+  const rest = projects.filter((p) => !cfg.projects.includes(p.id));
+  const list = showAll ? [...featured, ...rest] : featured;
 
   return (
     <Section id="projects" tone="bg-bg/90">
       <SectionHeader index="03" title="Projects">
-        Real code and images straight from my repos. Two of them run live in the terminal up top.
+        <span key={`pb-${mode}`} className="mode-in inline-block">
+          {cfg.projectsBlurb}
+        </span>
       </SectionHeader>
       <ul className="space-y-6">
-        {projects.map((p, i) => (
-          <Reveal as="li" key={p.id} delay={Math.min(i, 2) * 60}>
-            <ProjectCard p={p} meta={p.repo ? repos[p.repo.toLowerCase()] : undefined} />
+        {list.map((p, i) => (
+          <Reveal as="li" key={`${mode}-${p.id}`} delay={Math.min(i, 2) * 60}>
+            <ProjectCard p={p} meta={p.repo ? repos[p.repo.toLowerCase()] : undefined} angle={cfg.angles[p.id]} />
           </Reveal>
         ))}
       </ul>
+      {rest.length > 0 && (
+        <div className="mt-8 flex justify-center">
+          <button type="button" onClick={() => setShowAll((v) => !v)} className="pixel-button cursor-pointer">
+            {showAll ? "Show fewer" : `Show all ${projects.length} projects`}
+          </button>
+        </div>
+      )}
     </Section>
   );
 }
@@ -257,10 +301,13 @@ export function Projects() {
 /* ---------------------------------------------------------------- Stack */
 
 export function Stack() {
+  const { mode, cfg } = useMode();
   return (
     <Section id="stack" tone="bg-ink/90">
-      <SectionHeader index="04" title="Stack">
-        Every system on the car maps to part of how I build. Pick one to light it up.
+      <SectionHeader index="04" title={cfg.stackTitle}>
+        <span key={`sb-${mode}`} className="mode-in inline-block">
+          {cfg.stackBlurb}
+        </span>
       </SectionHeader>
       <Blueprint />
     </Section>
@@ -295,6 +342,7 @@ export function Achievements() {
 /* ---------------------------------------------------------------- Contact */
 
 export function Contact() {
+  const { mode, cfg } = useMode();
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     try {
@@ -311,9 +359,8 @@ export function Contact() {
       <div className="mx-auto w-full max-w-[1180px] px-4 sm:px-6 lg:px-8">
         <SectionHeader index="06" title="Let's talk." />
         <Reveal>
-          <p className="max-w-2xl text-xl leading-relaxed sm:text-2xl">
-            I&apos;m looking for software engineering internships. If you&apos;re building trading systems, backend infrastructure or applied ML,
-            I&apos;d love to hear from you.
+          <p key={`ct-${mode}`} className="mode-in max-w-2xl text-xl leading-relaxed sm:text-2xl">
+            {cfg.contact}
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-3">
             <a href={`mailto:${profile.email}`} className="pixel-button !bg-mint text-lg !text-ink">

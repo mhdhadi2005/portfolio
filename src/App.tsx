@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Header } from "./components/Header";
 import Leaderboard from "./components/Leaderboard";
+import { ModeDock, ModeTransition } from "./components/ModeSwitch";
 import NightScene from "./components/NightScene";
 import { RaceRail, useLapTimer } from "./components/Race";
 import { About, Achievements, Contact, Experience, Hero, Projects, Stack } from "./components/Sections";
@@ -37,6 +38,8 @@ export default function App() {
       </main>
       <RaceRail />
       <Leaderboard />
+      <ModeDock />
+      <ModeTransition />
     </>
   );
 }

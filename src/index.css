@@ -248,3 +248,19 @@ a {
     transform: rotate(360deg);
   }
 }
+
+/* Content that changes with the mode steps in (only after a switch, never on first load) */
+[data-mode-switched] .mode-in {
+  animation: mode-in 420ms steps(6) both;
+}
+@keyframes mode-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mode-in {
+    animation: none;
+  }
+}

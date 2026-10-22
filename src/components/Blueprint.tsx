@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { skills } from "../data";
+import { useMode } from "../modes";
 import { CarSide, type Zone } from "./F1Car";
 import { Reveal } from "./ui";
 
@@ -20,6 +20,8 @@ const ANCHOR: Record<Zone, { x: number; y: number; below?: boolean }> = {
 
 /** The #44 as an x-ray technical drawing; each system lights up and maps to part of the stack. */
 export default function Blueprint() {
+  const { mode, cfg } = useMode();
+  const skills = cfg.skills;
   const [active, setActive] = useState<Zone>("power");
   const [touched, setTouched] = useState(false);
 
@@ -29,7 +31,7 @@ export default function Blueprint() {
     const order = skills.map((s) => s.zone as Zone);
     const id = window.setInterval(() => setActive((z) => order[(order.indexOf(z) + 1) % order.length]), 2600);
     return () => window.clearInterval(id);
-  }, [touched]);
+  }, [touched, skills]);
 
   const pick = (z: Zone) => {
     setTouched(true);
@@ -42,7 +44,7 @@ export default function Blueprint() {
     <div>
       <Reveal className="pixel-box overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-line px-4 py-2 font-mono text-[11px] text-fg-faint">
-          <span>#44 · x-ray · systems → stack</span>
+          <span>#44 · x-ray · systems → {cfg.stackTitle.toLowerCase()}</span>
           <span className="hidden sm:inline">pick a system below</span>
         </div>
         <div
@@ -82,7 +84,7 @@ export default function Blueprint() {
           const z = g.zone as Zone;
           const on = z === active;
           return (
-            <Reveal key={g.group} delay={i * 60}>
+            <Reveal key={`${mode}-${g.group}`} delay={i * 60}>
               <button
                 type="button"
                 onMouseEnter={() => pick(z)}

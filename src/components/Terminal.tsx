@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
-import { profile, projects, sections, skills } from "../data";
+import { profile, projects, sections } from "../data";
+import { getMode, MODE_ORDER, MODES, setMode, type Mode } from "../modes";
 import { smaCrossover } from "../lib/backtest";
 import { btcStore, loadBtc, usd } from "../lib/btc";
 import { fetchBoard, secs } from "../lib/leaderboard";
@@ -153,6 +154,8 @@ export default function Terminal() {
         print("redis (in-browser, same commands as redis-java)", "amber");
         print("  SET k v [PX ms] · GET · INCR · DEL · EXISTS · KEYS * · TTL · EXPIRE · INFO · PING");
         print("  resp on|off               show the raw RESP bytes on the wire");
+        print("view", "amber");
+        print("  mode [eng|web|bd]         switch how the whole site presents me");
         print("pit wall", "amber");
         print("  lights                    F1 start-lights reaction test");
         print("  leaderboard               global top 10 reaction times");
@@ -160,10 +163,23 @@ export default function Terminal() {
         print("github", "amber");
         print("  git log                   my latest real commits");
         return;
+      case "mode": {
+        const want = (args[0] ?? "").toLowerCase();
+        const alias: Record<string, Mode> = { eng: "eng", engineer: "eng", web: "web", webdev: "web", bd: "bd", business: "bd" };
+        if (!want) {
+          print(`viewing as ${MODES[getMode()].label}. options: ${MODE_ORDER.map((m) => m).join(", ")}`, "dim");
+          return;
+        }
+        const next = alias[want];
+        if (!next) return print(`mode: unknown mode "${want}". try eng, web or bd`, "err");
+        print(`switching to ${MODES[next].label} view…`, "ok");
+        setMode(next);
+        return;
+      }
       case "whoami":
         print(profile.name, "ok");
-        print(`${profile.role} · ${profile.location}`);
-        print(profile.oneLiner, "dim");
+        print(`${MODES[getMode()].role} · ${profile.location}`);
+        print(MODES[getMode()].oneLiner, "dim");
         return;
       case "about":
         print(profile.intro);
@@ -182,7 +198,7 @@ export default function Terminal() {
         return;
       }
       case "stack":
-        for (const s of skills) print(`  ${s.group.padEnd(18)} ${s.items.join(", ")}`);
+        for (const s of MODES[getMode()].skills) print(`  ${s.group.padEnd(20)} ${s.items.join(", ")}`);
         return;
       case "contact":
         print(`  email     ${profile.email}`);
@@ -227,7 +243,7 @@ export default function Terminal() {
                 <span className="text-peri">now</span> {profile.status}
               </p>
               <p>
-                <span className="text-peri">langs</span> {skills[0].items.join(" · ")}
+                <span className="text-peri">langs</span> {MODES.eng.skills[0].items.join(" · ")}
               </p>
               <p>
                 <span className="text-peri">likes</span> markets · crypto · distributed systems
@@ -409,7 +425,7 @@ export default function Terminal() {
       setInput(i >= 0 ? history.current[i] : "");
     } else if (e.key === "Tab") {
       e.preventDefault();
-      const names = ["help", "whoami", "about", "projects", "open", "stack", "contact", "resume", "ls", "cd", "clear", "history", "neofetch", "price", "backtest", "git log", "resp", ...REDIS_COMMANDS];
+      const names = ["help", "mode", "whoami", "about", "projects", "open", "stack", "contact", "resume", "ls", "cd", "clear", "history", "neofetch", "price", "backtest", "git log", "resp", ...REDIS_COMMANDS];
       const hit = names.find((n) => n.toLowerCase().startsWith(input.toLowerCase()) && input.length > 0);
       if (hit) setInput(hit + " ");
     } else if (e.key === "l" && e.ctrlKey) {

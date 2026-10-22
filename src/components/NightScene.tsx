@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { getMode, MODES } from "../modes";
 
 type RGB = [number, number, number];
 
@@ -7,7 +8,6 @@ const BAYER4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) =>
 const SKY_TOP: RGB = [11, 13, 30];
 const SKY_MID: RGB = [26, 22, 64];
 const SKY_LOW: RGB = [58, 38, 92];
-const GLOW: RGB = [150, 78, 104];
 
 const MOON = "#f4ecd2";
 const AMBER = "#ffb454";
@@ -112,7 +112,9 @@ export default function NightScene() {
     }
 
     function renderSky(fade: number) {
-      const key = `${Math.round(fade * 60)}:${W}x${H}`;
+      // Horizon glow follows the mode: violet (engineer), teal (web), sunset (BD)
+      const GLOW = MODES[getMode()].glow;
+      const key = `${Math.round(fade * 60)}:${W}x${H}:${getMode()}`;
       if (key === skyKey) return;
       skyKey = key;
       const img = skyCtx.createImageData(W, H);
@@ -122,7 +124,7 @@ export default function NightScene() {
         const t = y / Math.max(1, H - 1);
         const a = t < 0.55 ? t / 0.55 : 1;
         const b = t < 0.55 ? 0 : (t - 0.55) / 0.45;
-        const glow = Math.pow(smooth(0.6, 1, t), 1.7) * 0.55 * fade;
+        const glow = Math.pow(smooth(0.5, 1, t), 1.5) * 0.72 * fade;
         const col = [0, 1, 2].map((c) => {
           const base = SKY_TOP[c] + (SKY_MID[c] - SKY_TOP[c]) * a + (SKY_LOW[c] - SKY_MID[c]) * b * fade;
           return base + (GLOW[c] - base) * glow;

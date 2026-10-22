@@ -7,6 +7,7 @@ const KEYWORDS: Record<string, RegExp> = {
   python: /\b(def|return|if|else|for|in|not|is|None|self|import|from|and|or|float|len|sum|abs|max|min)\b/,
   c: /\b(int|char|return|if|else|for|while|switch|case|break|static|void)\b/,
   sql: /\b(CREATE|TABLE|IF|NOT|EXISTS|INTEGER|TEXT|PRIMARY|KEY|AUTOINCREMENT|UNIQUE|NULL|DEFAULT|REFERENCES)\b/,
+  ts: /\b(const|let|await|async|if|else|return|null|new|function|export|import|from|Number|Promise)\b/,
 };
 
 /** A deliberately small highlighter: comments, strings, numbers, keywords. */
